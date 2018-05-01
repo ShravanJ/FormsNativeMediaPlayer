@@ -1,7 +1,8 @@
 # NativeMediaPlayer
 Native iOS and Android media players rendered in a Xamarin Forms solution
+
 Features include:
-* Uses platform specific native AVPlayer (iOS) and VideoView (Android)
+* Platform specific native AVPlayer (iOS) and VideoView (Android)
 * No extra dependencies
 * Full native performance
 * iOS solution utilizes the AVPlayerViewController inside of the PageRenderer so no xib-based ViewController is required
