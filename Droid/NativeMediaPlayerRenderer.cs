@@ -8,48 +8,66 @@ using NativeMediaPlayer;
 using Android.Content;
 using Android.Media;
 using Android.Net;
+using Android.App;
+using Android.Widget;
+
 
 [assembly: ExportRenderer(typeof(NativeMediaPlayerPage), typeof(NativeMediaPlayerRenderer))]
 namespace NativeMediaPlayer.Droid
 {
-    public class NativeMediaPlayerRenderer : PageRenderer, TextureView.ISurfaceTextureListener
+    public class NativeMediaPlayerRenderer : PageRenderer
     {
 
-        MediaPlayer player;
+        Activity activity;
+        Android.Views.View view;
+        VideoView videoView;
+        Context myContext;
 
-
-        public NativeMediaPlayerRenderer(Context context): base(context)
+        protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
         {
-            player = MediaPlayer.Create(context, Android.Net.Uri.Parse("https://shravanj.com/files/dev/vid.mp4"));
-            PrepareMediaPlayer();
+            base.OnElementChanged(e);
+            if (e.OldElement != null || Element == null)
+            {
+                return;
+            }
+
+            try
+            {
+                SetupUI();
+                StartMediaPlayer();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+
         }
 
-        public void OnSurfaceTextureAvailable(SurfaceTexture surface, int width, int height)
+
+        public NativeMediaPlayerRenderer(Context context) : base(context)
         {
-            player.Start();
+            myContext = context;
         }
 
-        public bool OnSurfaceTextureDestroyed(SurfaceTexture surface)
+        public void SetupUI()
         {
-            player.Stop();
-            player.Release();
-            return true;
+            activity = this.Context as Activity;
+            view = activity.LayoutInflater.Inflate(Resource.Layout.MyVideoView, this, false);
+            activity.SetContentView(view);
+            videoView = view.FindViewById<VideoView>(Resource.Id.VideoViewRender);
         }
 
-        public void OnSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height)
+        public void StartMediaPlayer()
         {
-            PrepareMediaPlayer();
+            var sourceUri = Android.Net.Uri.Parse("https://shravanj.com/files/dev/vid.mp4");
+            videoView.SetVideoURI(sourceUri);
+            videoView.Visibility = ViewStates.Visible;
+            MediaController mediaController = new MediaController(myContext);
+            mediaController.SetAnchorView(videoView);
+            videoView.SetMediaController(mediaController);
+            videoView.Start();
+            System.Diagnostics.Debug.WriteLine("Now playing");
         }
-
-        public void OnSurfaceTextureUpdated(SurfaceTexture surface)
-        {
-            //empty method
-        }
-
-        public void PrepareMediaPlayer()
-        {
-            player.PrepareAsync();
-        }
-
     }
 }
+
